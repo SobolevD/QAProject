@@ -7,48 +7,52 @@ import java.util.Random;
 public class GraphPrinter {
 
     // Cache
-    private List<Vertex> hangingVertexesCache = null;
+    // private List<Vertex> hangingVertexesCache = null;
 
     // Data
     private List<Vertex> graph = new ArrayList<>();
     private final static int START_VERTEX_NUM = 1;
 
-    public void init() {
+    public GraphPrinter() {
+        init(ConditionType.CONDITION_A);
+    }
 
-        hangingVertexesCache = null;
+    public GraphPrinter(int conditionType) {
+        init(conditionType);
+    }
+
+    private void init(int conditionType) {
 
         int currentVertexLevel = 0;
-
-        // Start condition
 
         graph.add(new Vertex(START_VERTEX_NUM, 0, currentVertexLevel));
 
         int currentVertexNum = 1;
-        // while (5 /* Condition A */) {
-        while (true) {
-            //for (int k = 0; k < 5; ++k) {
-            // Generate children for current vertex
 
+        // Generates new level of tree
+        while (true) {
+
+            // Generate children for current vertex
             List<Vertex> parentsOnCurrentLevel = getParentsByLevel(currentVertexLevel);
 
             // For each parent
             for (Vertex curParent : parentsOnCurrentLevel) {
-                int curChildsCount = getChildsCountForVertex(GraphType.NON_DETERMINED, Consts.MAX_CHILD_VERTEXES_COUNT);
+                int curChildsCount = getChildsCountForVertex(GraphType.DETERMINED, Consts.MAX_CHILD_VERTEXES_COUNT);
 
                 if (curChildsCount != 0) {
                     curParent.setHanging(false);
                 }
                 for (int i = 0; i < curChildsCount; ++i) {
 
-                    //Condition A
-                    if (Conditions.conditionA(currentVertexNum)) {
-                        if (i == 0) {
-                            curParent.setHanging(true);
+                    if (conditionType == ConditionType.CONDITION_A) {
+
+                        // Condition A
+                        if (Conditions.conditionA(currentVertexNum)) {
+                            if (i == 0) {
+                                curParent.setHanging(true);
+                            }
+                            return;
                         }
-                        print();
-                        getHangingVertexes();
-                        printHangingVertex();
-                        return;
                     }
 
                     Vertex currentVertex = new Vertex(++currentVertexNum, curParent.getNum(), curParent.getLevel() + 1);
@@ -56,18 +60,25 @@ public class GraphPrinter {
                 }
             }
 
-            //Condition B (check!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!)
-            /*if(Conditions.conditionB(graph.get(graph.size()-1).getNum()))
-            {
-                return;
-            }*/
             ++currentVertexLevel;
-            //}
+
+            // Condition B
+
+            if (conditionType == ConditionType.CONDITION_B && Conditions.conditionB(currentVertexNum)) {
+                for (Vertex curVertex : graph) {
+                    if (curVertex.getLevel() == currentVertexLevel) {
+                        curVertex.setHanging(true);
+                    }
+                }
+                return;
+            }
+
+            // }
         }
 
-        /*print();
-        getHangingVertexes();
-        printHangingVertex();*/
+        /*
+         * print(); getHangingVertexes(); printHangingVertex();
+         */
 
     }
 
@@ -89,19 +100,13 @@ public class GraphPrinter {
 
     public void printHangingVertex() {
         System.out.println("\nHANGING VERTEXES: ");
-        for (Vertex curVertex : hangingVertexesCache) {
+        for (Vertex curVertex : getHangingVertexes()) {
             System.out.print(printVertex(curVertex));
         }
     }
 
     private String printVertex(Vertex vertex) {
         return vertex.getNum() + "-" + vertex.getParent() + " ";
-    }
-
-    public static void main(String[] args) {
-
-        GraphPrinter gp = new GraphPrinter();
-        gp.init();
     }
 
     private List<Vertex> getParentsByLevel(int level) {
@@ -116,27 +121,29 @@ public class GraphPrinter {
 
     public List<Vertex> getHangingVertexes() {
 
-        if (hangingVertexesCache == null || hangingVertexesCache.isEmpty()) {
-            List<Vertex> result = new ArrayList<>();
-            for (Vertex currentVertex : graph) {
-                if (currentVertex.isHanging()) {
-                    result.add(currentVertex);
-                }
+        List<Vertex> result = new ArrayList<>();
+        for (Vertex currentVertex : graph) {
+            if (currentVertex.isHanging()) {
+                result.add(currentVertex);
             }
-            hangingVertexesCache = result;
-            return result;
         }
-        // Cache
-        return hangingVertexesCache;
+        return result;
     }
 
     private int getChildsCountForVertex(int type, int maxChildsCount) {
         if (type == GraphType.DETERMINED) {
             return maxChildsCount;
         } else {
-            //return new Random().nextInt() % maxChildsCount;
+            // return new Random().nextInt() % maxChildsCount;
             return new Random().nextInt(maxChildsCount);
         }
+    }
+
+    public static void main(String[] args) {
+
+        GraphPrinter gp = new GraphPrinter(ConditionType.CONDITION_B);
+        gp.print();
+        gp.printHangingVertex();
     }
 }
 
