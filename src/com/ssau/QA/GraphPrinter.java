@@ -6,22 +6,27 @@ import java.util.Random;
 
 public class GraphPrinter {
 
-    // Cache
-    // private List<Vertex> hangingVertexesCache = null;
-
     // Data
     private List<Vertex> graph = new ArrayList<>();
+    private GraphCache cache = new GraphCache(Consts.MAX_CHILD_VERTEXES_COUNT);
     private final static int START_VERTEX_NUM = 1;
 
+    int graphType;
+    int conditionType;
+
     public GraphPrinter() {
-        init(ConditionType.CONDITION_A);
+        this.graphType = GraphType.DETERMINED;
+        this.conditionType = ConditionType.CONDITION_A;
+        init();
     }
 
-    public GraphPrinter(int conditionType) {
-        init(conditionType);
+    public GraphPrinter(int conditionType, int graphType) {
+        this.graphType = graphType;
+        this.conditionType = conditionType;
+        init();
     }
 
-    private void init(int conditionType) {
+    private void init() {
 
         int currentVertexLevel = 0;
 
@@ -35,9 +40,21 @@ public class GraphPrinter {
             // Generate children for current vertex
             List<Vertex> parentsOnCurrentLevel = getParentsByLevel(currentVertexLevel);
 
-            // For each parent
+            // Bad graph. Try to build another one
+            if (parentsOnCurrentLevel.size() == 0) {
+                graph = new ArrayList<>();
+                init();
+                return;
+            }
+
+            // For each parent create children
             for (Vertex curParent : parentsOnCurrentLevel) {
-                int curChildsCount = getChildsCountForVertex(GraphType.DETERMINED, Consts.MAX_CHILD_VERTEXES_COUNT);
+                int curChildsCount = getChildsCountForVertex(graphType, Consts.MAX_CHILD_VERTEXES_COUNT);
+
+                // For statistic and gistogram
+                if (graphType != GraphType.DETERMINED) {
+                    cache.increment(curChildsCount);
+                }
 
                 if (curChildsCount != 0) {
                     curParent.setHanging(false);
@@ -73,12 +90,7 @@ public class GraphPrinter {
                 return;
             }
 
-            // }
         }
-
-        /*
-         * print(); getHangingVertexes(); printHangingVertex();
-         */
 
     }
 
@@ -88,20 +100,29 @@ public class GraphPrinter {
     public void print() {
 
         int currentLevel = 0;
+        System.out.print("Level 0: ");
         for (Vertex vertex : graph) {
 
             if (vertex.getLevel() > currentLevel) {
                 ++currentLevel;
                 System.out.println();
+                System.out.print("Level " + currentLevel + ": ");
             }
             System.out.print(printVertex(vertex));
         }
     }
 
     public void printHangingVertex() {
-        System.out.println("\nHANGING VERTEXES: ");
+        System.out.println("\n\nHANGING VERTEXES: ");
         for (Vertex curVertex : getHangingVertexes()) {
             System.out.print(printVertex(curVertex));
+        }
+        System.out.println();
+    }
+
+    public void printCache() {
+        if (graphType != GraphType.DETERMINED) {
+            cache.print();
         }
     }
 
@@ -134,17 +155,28 @@ public class GraphPrinter {
         if (type == GraphType.DETERMINED) {
             return maxChildsCount;
         } else {
-            // return new Random().nextInt() % maxChildsCount;
             return new Random().nextInt(maxChildsCount);
         }
     }
 
+    public int getGraphSize() {
+        return graph.size();
+    }
+
+    public int getHangingListSize() {
+        return getHangingVertexes().size();
+    }
+
+    public void printAlpha(double alpha) {
+        System.out.println("\nAlpha: " + alpha);
+    }
+
     public static void main(String[] args) {
 
-        GraphPrinter gp = new GraphPrinter(ConditionType.CONDITION_B);
+        GraphPrinter gp = new GraphPrinter(ConditionType.CONDITION_A, GraphType.DETERMINED);
         gp.print();
         gp.printHangingVertex();
+        gp.printCache();
+        gp.printAlpha(Calculator.calculateAlpha(gp.getGraphSize(), gp.getHangingListSize()));
     }
 }
-
-// 1-0
