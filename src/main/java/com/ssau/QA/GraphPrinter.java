@@ -2,6 +2,7 @@ package com.ssau.QA;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class GraphPrinter {
@@ -110,7 +111,7 @@ public class GraphPrinter {
     }
 
     public void printHangingVertex() {
-        System.out.println("\n\nHANGING VERTEXES: ");
+        System.out.println("\nHANGING VERTEXES: ");
         for (Vertex curVertex : getHangingVertexes()) {
             System.out.print(printVertex(curVertex));
         }
@@ -168,6 +169,10 @@ public class GraphPrinter {
         return graph.get(graph.size() - 1).getLevel();
     }
 
+    public Map<Integer, Integer> getChildCountFrequency(){
+        return cache.getChildsCountFrequency();
+    }
+
     public void printAlpha(double alpha) {
         System.out.println("\nAlpha: " + alpha);
     }
@@ -177,6 +182,13 @@ public class GraphPrinter {
         GraphPrinter gp = new GraphPrinter(ConditionType.CONDITION_A, GraphType.NON_DETERMINED);
         gp.print();
         gp.printHangingVertex();
+
+        System.out.println("\nVERTEXES COUNT: " + gp.getGraphSize());
+        System.out.println("HANGING VERTEXES COUNT: " + gp.getHangingListSize());
+
+        System.out.println("\nMATH EXPECTATION: " + Calculator.getMathExpectation(gp.getChildCountFrequency(), 1));
+        System.out.println("DISPERSION: " + Calculator.getDispersion(gp.getChildCountFrequency()));
+
         gp.printCache();
         gp.printAlpha(Calculator.calculateAlpha(gp.getGraphSize(), gp.getHangingListSize()));
         Calculator.printStatisticExcelTable(Consts.GRAPHS_COUNT, ConditionType.CONDITION_A);

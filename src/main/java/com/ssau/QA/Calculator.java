@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Calculator {
     public static Double calculateAlpha(int vertexesCount, int hangingVertexesCount) {
@@ -56,5 +57,20 @@ public class Calculator {
             e.printStackTrace();
         }
         System.out.println("Excel saved!");
+    }
+
+    public static Double getMathExpectation (Map<Integer, Integer> childsCountFrequency, int pow){
+        double numerator = 0.0;
+        double denominator = 0.0;
+        for(Map.Entry<Integer, Integer> currFreq: childsCountFrequency.entrySet()){
+            numerator += Math.pow(currFreq.getKey(), pow) * currFreq.getValue();
+            denominator += currFreq.getValue();
+        }
+
+        return numerator/denominator;
+    }
+
+    public static Double getDispersion (Map<Integer, Integer> childsCountFrequency){
+        return getMathExpectation(childsCountFrequency, 2) - Math.pow(getMathExpectation(childsCountFrequency, 1) ,2);
     }
 }
