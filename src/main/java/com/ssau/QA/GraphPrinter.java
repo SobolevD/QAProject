@@ -179,18 +179,16 @@ public class GraphPrinter {
 
     public static void main(String[] args) {
 
-        GraphPrinter gp = new GraphPrinter(ConditionType.CONDITION_A, GraphType.NON_DETERMINED);
+        GraphPrinter gp = new GraphPrinter(ConditionType.CONDITION_B, GraphType.NON_DETERMINED);
         gp.print();
         gp.printHangingVertex();
 
-        System.out.println("\nVERTEXES COUNT: " + gp.getGraphSize());
-        System.out.println("HANGING VERTEXES COUNT: " + gp.getHangingListSize());
-
-        System.out.println("\nMATH EXPECTATION: " + Calculator.getMathExpectation(gp.getChildCountFrequency(), 1));
-        System.out.println("DISPERSION: " + Calculator.getDispersion(gp.getChildCountFrequency()));
+        System.out.println("\nMATH EXPECTATION: " + Calculator.getMathExpectationIntInt(gp.getChildCountFrequency(), 1));
+        System.out.println("DISPERSION: " + Calculator.getDispersionIntInt(gp.getChildCountFrequency()));
 
         gp.printCache();
+        System.out.println("Graph size: " + gp.getGraphSize() + "; Hanging vertexes count: " + gp.getHangingListSize());
         gp.printAlpha(Calculator.calculateAlpha(gp.getGraphSize(), gp.getHangingListSize()));
-        Calculator.printStatisticExcelTable(Consts.GRAPHS_COUNT, ConditionType.CONDITION_A);
+        Calculator.printStatisticExcelTable(Consts.GRAPHS_COUNT, ConditionType.CONDITION_B);
     }
 }

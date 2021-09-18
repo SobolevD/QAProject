@@ -7,9 +7,7 @@ import org.apache.poi.ss.usermodel.Row;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Calculator {
@@ -34,24 +32,51 @@ public class Calculator {
         row.createCell(4).setCellValue("Hierarchy levels");
         ++rowNum;
 
+        Map<Double, Integer> tableAlpha = new HashMap<>();
+        Map<Integer, Integer> tableLeaves = new HashMap<>();
+        Map<Integer, Integer> tableLevels = new HashMap<>();
+
         for (int i = 0; i < graphsCount; ++i) {
-            GraphPrinter currentGraph = new GraphPrinter(GraphType.NON_DETERMINED, conditionType);
+            GraphPrinter currentGraph = new GraphPrinter(conditionType, GraphType.NON_DETERMINED);
 
             int graphSize = currentGraph.getGraphSize();
             int hangingVertexesCount = currentGraph.getHangingListSize();
             int hierarchyLevel = currentGraph.getHierarchyLevel();
+            double alpha = calculateAlpha(graphSize, hangingVertexesCount);
 
             Row currentRow = sheet.createRow(rowNum);
             currentRow.createCell(0).setCellValue(i);
             currentRow.createCell(1).setCellValue(graphSize);
             currentRow.createCell(2).setCellValue(hangingVertexesCount);
-            currentRow.createCell(3).setCellValue(calculateAlpha(graphSize, hangingVertexesCount));
+            currentRow.createCell(3).setCellValue(alpha);
             currentRow.createCell(4).setCellValue(hierarchyLevel);
+            tableAlpha.put(alpha, i);
+            tableLeaves.put(i, hangingVertexesCount);
+            tableLevels.put(hierarchyLevel, i);
+
             ++rowNum;
         }
 
+        Row maxExpectationRow = sheet.createRow(rowNum);
+        maxExpectationRow.createCell(0).setCellValue("Math expectation (alpha): ");
+        maxExpectationRow.createCell(1).setCellValue(getMathExpectationDoubleInt(tableAlpha, 1));
+        maxExpectationRow.createCell(2).setCellValue("Math expectation (leaves): ");
+        maxExpectationRow.createCell(3).setCellValue(getMathExpectationIntInt(tableLeaves, 1));
+        maxExpectationRow.createCell(4).setCellValue("Math expectation (levels): ");
+        maxExpectationRow.createCell(5).setCellValue(getMathExpectationIntInt(tableLevels, 1));
+
+        ++rowNum;
+
+        Row dispersionRow = sheet.createRow(rowNum);
+        dispersionRow.createCell(0).setCellValue("Dispersion (alpha): ");
+        dispersionRow.createCell(1).setCellValue(getDispersionDoubleInt(tableAlpha));
+        dispersionRow.createCell(2).setCellValue("Dispersion (leaves): ");
+        dispersionRow.createCell(3).setCellValue(getDispersionIntInt(tableLeaves));
+        dispersionRow.createCell(4).setCellValue("Dispersion (levels): ");
+        dispersionRow.createCell(5).setCellValue(getDispersionIntInt(tableLevels));
+
         // Save excel
-        try (FileOutputStream out = new FileOutputStream(new File("C:\\Users\\Nikita\\Desktop\\lab4.xls"))) {
+        try (FileOutputStream out = new FileOutputStream(new File("C:\\Users\\soboi\\Desktop\\Test\\lab4.xls"))) {
             workbook.write(out);
         } catch (IOException e) {
             e.printStackTrace();
@@ -59,10 +84,10 @@ public class Calculator {
         System.out.println("Excel saved!");
     }
 
-    public static Double getMathExpectation (Map<Integer, Integer> childsCountFrequency, int pow){
+    public static Double getMathExpectationIntInt(Map<Integer, Integer> table, int pow){
         double numerator = 0.0;
         double denominator = 0.0;
-        for(Map.Entry<Integer, Integer> currFreq: childsCountFrequency.entrySet()){
+        for(Map.Entry<Integer, Integer> currFreq: table.entrySet()){
             numerator += Math.pow(currFreq.getKey(), pow) * currFreq.getValue();
             denominator += currFreq.getValue();
         }
@@ -70,7 +95,22 @@ public class Calculator {
         return numerator/denominator;
     }
 
-    public static Double getDispersion (Map<Integer, Integer> childsCountFrequency){
-        return getMathExpectation(childsCountFrequency, 2) - Math.pow(getMathExpectation(childsCountFrequency, 1) ,2);
+    public static Double getMathExpectationDoubleInt(Map<Double, Integer> table, int pow){
+        double numerator = 0.0;
+        double denominator = 0.0;
+        for(Map.Entry<Double, Integer> currFreq: table.entrySet()){
+            numerator += Math.pow(currFreq.getKey(), pow) * currFreq.getValue();
+            denominator += currFreq.getValue();
+        }
+
+        return numerator/denominator;
+    }
+
+    public static Double getDispersionIntInt(Map<Integer, Integer> table){
+        return Calculator.getMathExpectationIntInt(table, 2) - Math.pow(Calculator.getMathExpectationIntInt(table, 1) ,2.0);
+    }
+
+    public static Double getDispersionDoubleInt(Map<Double, Integer> table){
+        return Calculator.getMathExpectationDoubleInt(table, 2) - Math.pow(Calculator.getMathExpectationDoubleInt(table, 1) ,2.0);
     }
 }
