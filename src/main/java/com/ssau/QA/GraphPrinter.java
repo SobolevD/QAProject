@@ -173,7 +173,7 @@ public class GraphPrinter {
 
     public static void main(String[] args) {
 
-        GraphPrinter gp = new GraphPrinter(ConditionType.CONDITION_A, GraphType.DETERMINED);
+        GraphPrinter gp = new GraphPrinter(ConditionType.CONDITION_A, GraphType.NON_DETERMINED);
         gp.print();
         gp.printHangingVertex();
         gp.printCache();
