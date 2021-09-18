@@ -94,9 +94,6 @@ public class GraphPrinter {
 
     }
 
-    public void stopPoint() {
-    }
-
     public void print() {
 
         int currentLevel = 0;
@@ -167,6 +164,10 @@ public class GraphPrinter {
         return getHangingVertexes().size();
     }
 
+    public int getHierarchyLevel() {
+        return graph.get(graph.size() - 1).getLevel();
+    }
+
     public void printAlpha(double alpha) {
         System.out.println("\nAlpha: " + alpha);
     }
@@ -178,5 +179,6 @@ public class GraphPrinter {
         gp.printHangingVertex();
         gp.printCache();
         gp.printAlpha(Calculator.calculateAlpha(gp.getGraphSize(), gp.getHangingListSize()));
+        Calculator.printStatisticExcelTable(Consts.GRAPHS_COUNT, ConditionType.CONDITION_A);
     }
 }

@@ -8,7 +8,7 @@ public class Conditions {
         return currentVertexNumber >= Consts.MAX_VERTEXES_COUNT;
     }
 
-    public static boolean conditionB(int finalOnLevelVertexNumber){
+    public static boolean conditionB(int finalOnLevelVertexNumber) {
         return finalOnLevelVertexNumber >= Consts.MAX_VERTEXES_COUNT;
     }
 
