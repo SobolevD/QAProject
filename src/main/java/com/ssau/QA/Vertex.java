@@ -2,9 +2,9 @@ package com.ssau.QA;
 
 public class Vertex {
 
-    private int num;
-    private int parent;
-    private int level;
+    private final int num;
+    private final int parent;
+    private final int level;
     private boolean isHanging;
 
     public boolean isHanging() {
@@ -19,24 +19,12 @@ public class Vertex {
         return num;
     }
 
-    public void setNum(int num) {
-        this.num = num;
-    }
-
     public int getParent() {
         return parent;
     }
 
-    public void setParent(int parent) {
-        this.parent = parent;
-    }
-
     public int getLevel() {
         return level;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
     }
 
     public Vertex(int num, int parent, int level) {

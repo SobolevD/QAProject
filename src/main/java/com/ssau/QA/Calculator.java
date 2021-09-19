@@ -37,7 +37,7 @@ public class Calculator {
         Map<Integer, Integer> tableLevels = new HashMap<>();
 
         for (int i = 0; i < graphsCount; ++i) {
-            GraphPrinter currentGraph = new GraphPrinter(conditionType, GraphType.NON_DETERMINED);
+            GraphPrinter currentGraph = new GraphPrinter(conditionType, GraphType.NON_DETERMINED, Consts.MAX_VERTEXES_COUNT);
 
             int graphSize = currentGraph.getGraphSize();
             int hangingVertexesCount = currentGraph.getHangingListSize();
@@ -76,7 +76,7 @@ public class Calculator {
         dispersionRow.createCell(5).setCellValue(getDispersionIntInt(tableLevels));
 
         // Save excel
-        try (FileOutputStream out = new FileOutputStream(new File("C:\\Users\\soboi\\Desktop\\Test\\lab4.xls"))) {
+        try (FileOutputStream out = new FileOutputStream(new File(PathConsts.PATH_TO_SAVE_STATISTIC_FILE))) {
             workbook.write(out);
         } catch (IOException e) {
             e.printStackTrace();
@@ -112,5 +112,60 @@ public class Calculator {
 
     public static Double getDispersionDoubleInt(Map<Double, Integer> table){
         return Calculator.getMathExpectationDoubleInt(table, 2) - Math.pow(Calculator.getMathExpectationDoubleInt(table, 1) ,2.0);
+    }
+
+    public static void printAlphaParameterGraphExcel(int maxVertexesCount, int accuracy) {
+
+        final int minAccuracy = 1;
+        final int maxAccuracy = 20;
+
+        if (accuracy < minAccuracy)
+        {
+            accuracy = minAccuracy;
+        }
+
+        if (accuracy > maxAccuracy)
+        {
+            accuracy = maxAccuracy;
+        }
+
+        // Excel file
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        // Create sheet with 'Statistic' name
+        HSSFSheet sheet = workbook.createSheet("Alpha");
+
+        int rowNum = 0;
+
+        // Headers
+        Row row = sheet.createRow(rowNum);
+        row.createCell(0).setCellValue("Vertexes count");
+        row.createCell(1).setCellValue("Average alpha");
+        ++rowNum;
+
+        for (int i = 1; i < maxVertexesCount; ++i) {
+
+            double sumAllAlpha = 0.0;
+
+            for (int j = 0; j < accuracy; ++j){
+                GraphPrinter currentGraph = new GraphPrinter(/* Do not clear this field. It is true */ ConditionType.CONDITION_A, GraphType.NON_DETERMINED, i);
+                sumAllAlpha+=calculateAlpha(currentGraph.getGraphSize(), currentGraph.getHangingListSize());
+            }
+
+            double averageAlpha = sumAllAlpha/accuracy;
+
+            Row currentRow = sheet.createRow(rowNum);
+            currentRow.createCell(0).setCellValue(i);
+            currentRow.createCell(1).setCellValue(averageAlpha);
+
+            ++rowNum;
+        }
+
+        // Save excel
+        try (FileOutputStream out = new FileOutputStream(new File(PathConsts.PAHT_TO_SAVE_ALPHA_VALUES_FILE))) {
+            workbook.write(out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Excel saved!");
     }
 }

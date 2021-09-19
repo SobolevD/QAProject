@@ -9,7 +9,7 @@ public class GraphPrinter {
 
     // Data
     private List<Vertex> graph = new ArrayList<>();
-    private GraphCache cache = new GraphCache(Consts.MAX_CHILD_VERTEXES_COUNT);
+    private final GraphCache cache = new GraphCache(Consts.MAX_CHILD_VERTEXES_COUNT);
     private final static int START_VERTEX_NUM = 1;
 
     int graphType;
@@ -18,16 +18,16 @@ public class GraphPrinter {
     public GraphPrinter() {
         this.graphType = GraphType.DETERMINED;
         this.conditionType = ConditionType.CONDITION_A;
-        init();
+        init(Consts.MAX_VERTEXES_COUNT);
     }
 
-    public GraphPrinter(int conditionType, int graphType) {
+    public GraphPrinter(int conditionType, int graphType, int maxVertexesCount) {
         this.graphType = graphType;
         this.conditionType = conditionType;
-        init();
+        init(maxVertexesCount);
     }
 
-    private void init() {
+    private void init(int maxVertexesCount) {
 
         int currentVertexLevel = 0;
 
@@ -44,7 +44,7 @@ public class GraphPrinter {
             // Bad graph. Try to build another one
             if (parentsOnCurrentLevel.size() == 0) {
                 graph = new ArrayList<>();
-                init();
+                init(maxVertexesCount);
                 return;
             }
 
@@ -52,7 +52,7 @@ public class GraphPrinter {
             for (Vertex curParent : parentsOnCurrentLevel) {
                 int curChildsCount = getChildsCountForVertex(graphType, Consts.MAX_CHILD_VERTEXES_COUNT);
 
-                // For statistic and gistogram
+                // For statistic and diagram
                 if (graphType != GraphType.DETERMINED) {
                     cache.increment(curChildsCount);
                 }
@@ -65,7 +65,7 @@ public class GraphPrinter {
                     if (conditionType == ConditionType.CONDITION_A) {
 
                         // Condition A
-                        if (Conditions.conditionA(currentVertexNum)) {
+                        if (currentVertexNum >= maxVertexesCount) {
                             if (i == 0) {
                                 curParent.setHanging(true);
                             }
@@ -82,7 +82,7 @@ public class GraphPrinter {
 
             // Condition B
 
-            if (conditionType == ConditionType.CONDITION_B && Conditions.conditionB(currentVertexNum)) {
+            if (conditionType == ConditionType.CONDITION_B && currentVertexNum >= maxVertexesCount) {
                 for (Vertex curVertex : graph) {
                     if (curVertex.getLevel() == currentVertexLevel) {
                         curVertex.setHanging(true);
@@ -179,7 +179,7 @@ public class GraphPrinter {
 
     public static void main(String[] args) {
 
-        GraphPrinter gp = new GraphPrinter(ConditionType.CONDITION_B, GraphType.NON_DETERMINED);
+        GraphPrinter gp = new GraphPrinter(Consts.CURRENT_VARIANT_CONDITION, GraphType.NON_DETERMINED, Consts.MAX_VERTEXES_COUNT);
         gp.print();
         gp.printHangingVertex();
 
@@ -189,6 +189,8 @@ public class GraphPrinter {
         gp.printCache();
         System.out.println("Graph size: " + gp.getGraphSize() + "; Hanging vertexes count: " + gp.getHangingListSize());
         gp.printAlpha(Calculator.calculateAlpha(gp.getGraphSize(), gp.getHangingListSize()));
-        Calculator.printStatisticExcelTable(Consts.GRAPHS_COUNT, ConditionType.CONDITION_B);
+        Calculator.printStatisticExcelTable(Consts.GRAPHS_COUNT, Consts.CURRENT_VARIANT_CONDITION);
+
+        Calculator.printAlphaParameterGraphExcel(100, 10);
     }
 }
