@@ -7,8 +7,7 @@ import org.apache.poi.ss.usermodel.Row;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Calculator {
     public static Double calculateAlpha(int vertexesCount, int hangingVertexesCount) {
@@ -84,48 +83,46 @@ public class Calculator {
         System.out.println("Excel saved!");
     }
 
-    public static Double getMathExpectationIntInt(Map<Integer, Integer> table, int pow){
+    public static Double getMathExpectationIntInt(Map<Integer, Integer> table, int pow) {
         double numerator = 0.0;
         double denominator = 0.0;
-        for(Map.Entry<Integer, Integer> currFreq: table.entrySet()){
+        for (Map.Entry<Integer, Integer> currFreq : table.entrySet()) {
             numerator += Math.pow(currFreq.getKey(), pow) * currFreq.getValue();
             denominator += currFreq.getValue();
         }
 
-        return numerator/denominator;
+        return numerator / denominator;
     }
 
-    public static Double getMathExpectationDoubleInt(Map<Double, Integer> table, int pow){
+    public static Double getMathExpectationDoubleInt(Map<Double, Integer> table, int pow) {
         double numerator = 0.0;
         double denominator = 0.0;
-        for(Map.Entry<Double, Integer> currFreq: table.entrySet()){
+        for (Map.Entry<Double, Integer> currFreq : table.entrySet()) {
             numerator += Math.pow(currFreq.getKey(), pow) * currFreq.getValue();
             denominator += currFreq.getValue();
         }
 
-        return numerator/denominator;
+        return numerator / denominator;
     }
 
-    public static Double getDispersionIntInt(Map<Integer, Integer> table){
-        return Calculator.getMathExpectationIntInt(table, 2) - Math.pow(Calculator.getMathExpectationIntInt(table, 1) ,2.0);
+    public static Double getDispersionIntInt(Map<Integer, Integer> table) {
+        return Calculator.getMathExpectationIntInt(table, 2) - Math.pow(Calculator.getMathExpectationIntInt(table, 1), 2.0);
     }
 
-    public static Double getDispersionDoubleInt(Map<Double, Integer> table){
-        return Calculator.getMathExpectationDoubleInt(table, 2) - Math.pow(Calculator.getMathExpectationDoubleInt(table, 1) ,2.0);
+    public static Double getDispersionDoubleInt(Map<Double, Integer> table) {
+        return Calculator.getMathExpectationDoubleInt(table, 2) - Math.pow(Calculator.getMathExpectationDoubleInt(table, 1), 2.0);
     }
 
-    public static void printAlphaParameterGraphExcel(int maxVertexesCount, int accuracy) {
+    public static void printAlphaParameterGraphExcel2(int maxVertexesCount, int accuracy) {
 
         final int minAccuracy = 1;
         final int maxAccuracy = 20;
 
-        if (accuracy < minAccuracy)
-        {
+        if (accuracy < minAccuracy) {
             accuracy = minAccuracy;
         }
 
-        if (accuracy > maxAccuracy)
-        {
+        if (accuracy > maxAccuracy) {
             accuracy = maxAccuracy;
         }
 
@@ -146,12 +143,12 @@ public class Calculator {
 
             double sumAllAlpha = 0.0;
 
-            for (int j = 0; j < accuracy; ++j){
+            for (int j = 0; j < accuracy; ++j) {
                 GraphPrinter currentGraph = new GraphPrinter(/* Do not clear this field. It is true */ ConditionType.CONDITION_A, GraphType.NON_DETERMINED, i);
-                sumAllAlpha+=calculateAlpha(currentGraph.getGraphSize(), currentGraph.getHangingListSize());
+                sumAllAlpha += calculateAlpha(currentGraph.getGraphSize(), currentGraph.getHangingListSize());
             }
 
-            double averageAlpha = sumAllAlpha/accuracy;
+            double averageAlpha = sumAllAlpha / accuracy;
 
             Row currentRow = sheet.createRow(rowNum);
             currentRow.createCell(0).setCellValue(i);
@@ -167,5 +164,55 @@ public class Calculator {
             e.printStackTrace();
         }
         System.out.println("Excel saved!");
+    }
+
+    public static List<Vertex> hangingVertexes(List<Vertex> graph) {
+
+        List<Vertex> result = new ArrayList<>();
+
+        Set<Integer> parents = new TreeSet<>();
+
+        for (Vertex curVertex : graph) {
+            parents.add(curVertex.getParent());
+        }
+
+        for (Vertex curVertex : graph) {
+            if (!parents.contains(curVertex.getNum())) {
+                result.add(curVertex);
+            }
+        }
+        return result;
+    }
+
+    public static void printAlphaParameterGraphExcel(int maxVertexCount) {
+
+        // Excel file
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        // Create sheet with 'Statistic' name
+        HSSFSheet sheet = workbook.createSheet("Alpha");
+
+        int rowNum = 0;
+
+        // Headers
+        Row row = sheet.createRow(rowNum);
+        row.createCell(0).setCellValue("Vertexes count");
+        row.createCell(1).setCellValue("Average alpha");
+        ++rowNum;
+
+        GraphPrinter gp = new GraphPrinter(Consts.CURRENT_VARIANT_CONDITION, GraphType.NON_DETERMINED, maxVertexCount);
+
+        for (int i = 1; i < maxVertexCount; ++i){
+            List<Vertex> subGraph = gp.subGraph(i);
+
+            int hangingVertexesCount = hangingVertexes(subGraph).size();
+            int vertexesCount = i;
+
+            double alpha = calculateAlpha(i, hangingVertexesCount);
+
+            Row currentRow = sheet.createRow(rowNum);
+            currentRow.createCell(0).setCellValue(i);
+            currentRow.createCell(1).setCellValue(alpha);
+        }
+
     }
 }

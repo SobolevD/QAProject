@@ -151,7 +151,7 @@ public class GraphPrinter {
 
     private int getChildsCountForVertex(int type, int maxChildsCount) {
         if (type == GraphType.DETERMINED) {
-            return maxChildsCount;
+            return maxChildsCount - 1;
         } else {
             return new Random().nextInt(maxChildsCount);
         }
@@ -177,9 +177,13 @@ public class GraphPrinter {
         System.out.println("\nAlpha: " + alpha);
     }
 
+    public List<Vertex> subGraph(int vertexesCount){
+        return graph.subList(0, vertexesCount);
+    }
+
     public static void main(String[] args) {
 
-        GraphPrinter gp = new GraphPrinter(Consts.CURRENT_VARIANT_CONDITION, GraphType.NON_DETERMINED, Consts.MAX_VERTEXES_COUNT);
+        GraphPrinter gp = new GraphPrinter(Consts.CURRENT_VARIANT_CONDITION, GraphType.DETERMINED, Consts.MAX_VERTEXES_COUNT);
         gp.print();
         gp.printHangingVertex();
 
@@ -191,6 +195,6 @@ public class GraphPrinter {
         gp.printAlpha(Calculator.calculateAlpha(gp.getGraphSize(), gp.getHangingListSize()));
         Calculator.printStatisticExcelTable(Consts.GRAPHS_COUNT, Consts.CURRENT_VARIANT_CONDITION);
 
-        Calculator.printAlphaParameterGraphExcel(100, 10);
+        Calculator.printAlphaParameterGraphExcel(100);
     }
 }
