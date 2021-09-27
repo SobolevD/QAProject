@@ -183,7 +183,7 @@ public class GraphPrinter {
 
     public static void main(String[] args) {
 
-        GraphPrinter gp = new GraphPrinter(Consts.CURRENT_VARIANT_CONDITION, GraphType.DETERMINED, Consts.MAX_VERTEXES_COUNT);
+        GraphPrinter gp = new GraphPrinter(Consts.CURRENT_VARIANT_CONDITION, GraphType.NON_DETERMINED, Consts.MAX_VERTEXES_COUNT);
         gp.print();
         gp.printHangingVertex();
 

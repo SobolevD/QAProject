@@ -204,6 +204,12 @@ public class Calculator {
         for (int i = 1; i < maxVertexCount; ++i){
             List<Vertex> subGraph = gp.subGraph(i);
 
+            if (i == 20)
+            {
+                System.out.println("Graph 20: ");
+                gp.print();
+            }
+
             int hangingVertexesCount = hangingVertexes(subGraph).size();
             int vertexesCount = i;
 
@@ -212,7 +218,16 @@ public class Calculator {
             Row currentRow = sheet.createRow(rowNum);
             currentRow.createCell(0).setCellValue(i);
             currentRow.createCell(1).setCellValue(alpha);
+            ++rowNum;
         }
+
+        // Save excel
+        try (FileOutputStream out = new FileOutputStream(new File(PathConsts.PAHT_TO_SAVE_ALPHA_VALUES_FILE))) {
+            workbook.write(out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Excel saved!");
 
     }
 }
